@@ -81,14 +81,37 @@ public class MiniBank {
         System.out.print("Enter customer name: ");
         String name = sc.nextLine();
 
+        if (!Validator.isValidName(name)) {
+            System.out.println("Invalid name.");
+            return;
+        }
+
         System.out.print("Enter customer email: ");
         String email = sc.nextLine();
 
-        Customer customer = new Customer(customerId, name, email);
+        if (!Validator.isValidEmail(email)) {
+            System.out.println("Invalid email.");
+            return;
+        }
+
+        Customer customer =
+                new Customer(customerId, name, email);
+
+        System.out.print("Enter city: ");
+        String city = sc.nextLine();
+
+        System.out.print("Enter state: ");
+        String state = sc.nextLine();
+
+        Customer.Address address =
+                new Customer.Address(city, state);
+
+        customer.setAddress(address);
 
         int accountId = accountCount + 1001;
 
-        accounts[accountCount] = new Account(accountId, customer);
+        accounts[accountCount] =
+                new Account(accountId, customer);
 
         accountCount++;
 
@@ -123,6 +146,11 @@ public class MiniBank {
         System.out.print("Enter amount: ");
         double amount = sc.nextDouble();
 
+        if (!Validator.isValidAmount(amount)) {
+            System.out.println("Invalid amount.");
+            return;
+        }
+
         account.deposit(amount);
     }
 
@@ -141,6 +169,11 @@ public class MiniBank {
         System.out.print("Enter amount: ");
         double amount = sc.nextDouble();
 
+        if (!Validator.isValidAmount(amount)) {
+            System.out.println("Invalid amount.");
+            return;
+        }
+
         account.withdraw(amount);
     }
 
@@ -153,18 +186,23 @@ public class MiniBank {
 
         for (int i = 0; i < accountCount; i++) {
 
-            Account account = accounts[i];
-
             System.out.println("\n----------------------");
-            System.out.println("Account ID: " + account.getAccountId());
-            System.out.println("Customer ID: "
-                    + account.getCustomer().getCustomerId());
-            System.out.println("Name: "
-                    + account.getCustomer().getName());
-            System.out.println("Email: "
-                    + account.getCustomer().getEmail());
-            System.out.println("Balance: "
-                    + account.getBalance());
+
+            System.out.println(
+                    StatementFormatter.format(accounts[i])
+            );
+
+            Customer customer =
+                    accounts[i].getCustomer();
+
+            System.out.println("Address: "
+                    + customer.getAddress());
+
+            if (customer instanceof Customer) {
+                System.out.println(
+                        "Customer is an instance of Customer."
+                );
+            }
         }
     }
 }

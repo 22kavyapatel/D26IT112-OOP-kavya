@@ -43,4 +43,33 @@ public class Account {
             System.out.println("Amount withdrawn successfully.");
         }
     }
+
+    @Override
+    public String toString() {
+
+        return "Account ID: " + accountId
+                + ", Customer: " + customer.getName()
+                + ", Balance: " + balance;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof Account)) {
+            return false;
+        }
+
+        Account other = (Account) obj;
+
+        return accountId == other.accountId;
+    }
+
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(accountId);
+    }
 }
