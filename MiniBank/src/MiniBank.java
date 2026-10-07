@@ -2,9 +2,12 @@ import java.util.Scanner;
 
 public class MiniBank {
 
-    public static void main(String[] args) {
+    static Scanner sc = new Scanner(System.in);
 
-        Scanner sc = new Scanner(System.in);
+    static Account[] accounts = new Account[10];
+    static int accountCount = 0;
+
+    public static void main(String[] args) {
 
         BankInfo bank = new BankInfo("MiniBank", "CHARUSAT");
 
@@ -28,67 +31,140 @@ public class MiniBank {
             System.out.print("Enter your choice: ");
             int choice = sc.nextInt();
 
-            MenuOption option;
-
             switch (choice) {
+
                 case 1:
-                    option = MenuOption.CREATE_ACCOUNT;
+                    createAccount();
                     break;
 
                 case 2:
-                    option = MenuOption.DEPOSIT;
+                    deposit();
                     break;
 
                 case 3:
-                    option = MenuOption.WITHDRAW;
+                    withdraw();
                     break;
 
                 case 4:
-                    option = MenuOption.TRANSFER;
+                    System.out.println("Transfer will be added later.");
                     break;
 
                 case 5:
-                    option = MenuOption.SHOW_ACCOUNTS;
+                    showAccounts();
                     break;
 
                 case 6:
-                    option = MenuOption.EXIT;
+                    System.out.println("Thank you for using MiniBank!");
+                    running = false;
                     break;
 
                 default:
                     System.out.println("Invalid choice!");
-                    continue;
-            }
-
-            switch (option) {
-
-                case CREATE_ACCOUNT:
-                    System.out.println("Create Account selected.");
-                    break;
-
-                case DEPOSIT:
-                    System.out.println("Deposit selected.");
-                    break;
-
-                case WITHDRAW:
-                    System.out.println("Withdraw selected.");
-                    break;
-
-                case TRANSFER:
-                    System.out.println("Transfer selected.");
-                    break;
-
-                case SHOW_ACCOUNTS:
-                    System.out.println("Show Accounts selected.");
-                    break;
-
-                case EXIT:
-                    System.out.println("Thank you for using MiniBank!");
-                    running = false;
-                    break;
             }
         }
 
         sc.close();
+    }
+
+    static void createAccount() {
+
+        if (accountCount == accounts.length) {
+            System.out.println("Account limit reached.");
+            return;
+        }
+
+        System.out.print("Enter customer ID: ");
+        int customerId = sc.nextInt();
+
+        sc.nextLine();
+
+        System.out.print("Enter customer name: ");
+        String name = sc.nextLine();
+
+        System.out.print("Enter customer email: ");
+        String email = sc.nextLine();
+
+        Customer customer = new Customer(customerId, name, email);
+
+        int accountId = accountCount + 1001;
+
+        accounts[accountCount] = new Account(accountId, customer);
+
+        accountCount++;
+
+        System.out.println("Account created successfully.");
+        System.out.println("Account ID: " + accountId);
+    }
+
+    static Account findAccount(int accountId) {
+
+        for (int i = 0; i < accountCount; i++) {
+
+            if (accounts[i].getAccountId() == accountId) {
+                return accounts[i];
+            }
+        }
+
+        return null;
+    }
+
+    static void deposit() {
+
+        System.out.print("Enter account ID: ");
+        int accountId = sc.nextInt();
+
+        Account account = findAccount(accountId);
+
+        if (account == null) {
+            System.out.println("Account not found.");
+            return;
+        }
+
+        System.out.print("Enter amount: ");
+        double amount = sc.nextDouble();
+
+        account.deposit(amount);
+    }
+
+    static void withdraw() {
+
+        System.out.print("Enter account ID: ");
+        int accountId = sc.nextInt();
+
+        Account account = findAccount(accountId);
+
+        if (account == null) {
+            System.out.println("Account not found.");
+            return;
+        }
+
+        System.out.print("Enter amount: ");
+        double amount = sc.nextDouble();
+
+        account.withdraw(amount);
+    }
+
+    static void showAccounts() {
+
+        if (accountCount == 0) {
+            System.out.println("No accounts found.");
+            return;
+        }
+
+        for (int i = 0; i < accountCount; i++) {
+
+            Account account = accounts[i];
+
+            System.out.println("\n----------------------");
+            System.out.println("Account ID: " + account.getAccountId());
+            System.out.println("Customer ID: "
+                    + account.getCustomer().getCustomerId());
+            System.out.println("Name: "
+                    + account.getCustomer().getName());
+            System.out.println("Email: "
+                    + account.getCustomer().getEmail());
+            System.out.println("Balance: "
+                    + account.getBalance());
+        }
     }
 }
