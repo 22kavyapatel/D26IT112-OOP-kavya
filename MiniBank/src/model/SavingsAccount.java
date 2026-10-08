@@ -1,4 +1,7 @@
-public class SavingsAccount extends Account {
+package model;
+
+public class SavingsAccount extends Account
+        implements Premium {
 
     public SavingsAccount(int accountId, Customer customer) {
         super(accountId, customer);
@@ -10,7 +13,7 @@ public class SavingsAccount extends Account {
     }
 
     @Override
-    public boolean canWithdraw(double amount) {
+    public boolean canWithdraw(long amount) {
         return amount > 0 && amount <= getBalance();
     }
 }

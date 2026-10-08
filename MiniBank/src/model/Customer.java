@@ -1,3 +1,5 @@
+package model;
+
 public class Customer implements Cloneable {
 
     private int customerId;
@@ -31,7 +33,6 @@ public class Customer implements Cloneable {
         this.address = address;
     }
 
-    // Nested class
     public static class Address {
 
         private String city;
@@ -50,6 +51,7 @@ public class Customer implements Cloneable {
 
     @Override
     public String toString() {
+
         return "Customer ID: " + customerId
                 + ", Name: " + name
                 + ", Email: " + email
@@ -81,13 +83,12 @@ public class Customer implements Cloneable {
     public Customer clone() {
 
         try {
+
             Customer copy = (Customer) super.clone();
 
             if (address != null) {
-                copy.address = new Address(
-                        address.city,
-                        address.state
-                );
+                copy.address =
+                        new Address(address.city, address.state);
             }
 
             return copy;

@@ -1,3 +1,5 @@
+package model;
+
 public class FixedDepositAccount extends Account {
 
     public FixedDepositAccount(int accountId, Customer customer) {
@@ -10,7 +12,7 @@ public class FixedDepositAccount extends Account {
     }
 
     @Override
-    public boolean canWithdraw(double amount) {
+    public boolean canWithdraw(long amount) {
         return false;
     }
 }

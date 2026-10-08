@@ -1,3 +1,7 @@
+package service;
+
+import model.Account;
+
 public class StatementFormatter {
 
     public static String format(Account account) {
@@ -5,6 +9,7 @@ public class StatementFormatter {
         return "Account ID: " + account.getAccountId()
                 + "\nCustomer: " + account.getCustomer().getName()
                 + "\nEmail: " + account.getCustomer().getEmail()
-                + "\nBalance: " + account.getBalance();
+                + "\nBalance: " + account.getBalance()
+                + "\nInterest Rate: " + account.interestRate() + "%";
     }
 }

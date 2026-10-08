@@ -1,13 +1,16 @@
-public abstract class Account {
+package model;
+
+public abstract class Account
+        implements Transactable, InterestBearing {
 
     private int accountId;
     private Customer customer;
-    private double balance;
+    private long balance;
 
     public Account(int accountId, Customer customer) {
         this.accountId = accountId;
         this.customer = customer;
-        this.balance = 0.0;
+        this.balance = 0;
     }
 
     public int getAccountId() {
@@ -18,15 +21,17 @@ public abstract class Account {
         return customer;
     }
 
-    public double getBalance() {
+    @Override
+    public long getBalance() {
         return balance;
     }
 
-    protected void setBalance(double balance) {
+    protected void setBalance(long balance) {
         this.balance = balance;
     }
 
-    public void deposit(double amount) {
+    @Override
+    public void deposit(long amount) {
 
         if (amount > 0) {
             balance = balance + amount;
@@ -36,21 +41,27 @@ public abstract class Account {
         }
     }
 
-    public void withdraw(double amount) {
+    @Override
+    public boolean withdraw(long amount) {
 
         if (amount <= 0) {
             System.out.println("Invalid amount.");
-        } else if (!canWithdraw(amount)) {
-            System.out.println("Withdrawal not allowed.");
-        } else {
-            balance = balance - amount;
-            System.out.println("Amount withdrawn successfully.");
+            return false;
         }
+
+        if (!canWithdraw(amount)) {
+            System.out.println("Withdrawal not allowed.");
+            return false;
+        }
+
+        balance = balance - amount;
+
+        System.out.println("Amount withdrawn successfully.");
+
+        return true;
     }
 
-    public abstract double interestRate();
-
-    public abstract boolean canWithdraw(double amount);
+    public abstract boolean canWithdraw(long amount);
 
     @Override
     public String toString() {
