@@ -1,4 +1,4 @@
-public class Account {
+public abstract class Account {
 
     private int accountId;
     private Customer customer;
@@ -22,6 +22,10 @@ public class Account {
         return balance;
     }
 
+    protected void setBalance(double balance) {
+        this.balance = balance;
+    }
+
     public void deposit(double amount) {
 
         if (amount > 0) {
@@ -36,13 +40,17 @@ public class Account {
 
         if (amount <= 0) {
             System.out.println("Invalid amount.");
-        } else if (amount > balance) {
-            System.out.println("Insufficient balance.");
+        } else if (!canWithdraw(amount)) {
+            System.out.println("Withdrawal not allowed.");
         } else {
             balance = balance - amount;
             System.out.println("Amount withdrawn successfully.");
         }
     }
+
+    public abstract double interestRate();
+
+    public abstract boolean canWithdraw(double amount);
 
     @Override
     public String toString() {

@@ -25,7 +25,7 @@ public class MiniBank {
             System.out.println("2. Deposit");
             System.out.println("3. Withdraw");
             System.out.println("4. Transfer");
-            System.out.println("5. Show Accounts");
+        System.out.println("5. Show Accounts");
             System.out.println("6. Exit");
 
             System.out.print("Enter your choice: ");
@@ -76,10 +76,8 @@ public class MiniBank {
         System.out.print("Enter customer ID: ");
         int customerId = sc.nextInt();
 
-        sc.nextLine();
-
         System.out.print("Enter customer name: ");
-        String name = sc.nextLine();
+        String name = sc.next();
 
         if (!Validator.isValidName(name)) {
             System.out.println("Invalid name.");
@@ -87,7 +85,7 @@ public class MiniBank {
         }
 
         System.out.print("Enter customer email: ");
-        String email = sc.nextLine();
+        String email = sc.next();
 
         if (!Validator.isValidEmail(email)) {
             System.out.println("Invalid email.");
@@ -98,21 +96,47 @@ public class MiniBank {
                 new Customer(customerId, name, email);
 
         System.out.print("Enter city: ");
-        String city = sc.nextLine();
+        String city = sc.next();
 
         System.out.print("Enter state: ");
-        String state = sc.nextLine();
+        String state = sc.next();
 
         Customer.Address address =
                 new Customer.Address(city, state);
 
         customer.setAddress(address);
 
+        System.out.println("\nSelect Account Type:");
+        System.out.println("1. Savings Account");
+        System.out.println("2. Current Account");
+        System.out.println("3. Fixed Deposit Account");
+
+        System.out.print("Enter type: ");
+        int type = sc.nextInt();
+
         int accountId = accountCount + 1001;
 
-        accounts[accountCount] =
-                new Account(accountId, customer);
+        Account account;
 
+        if (type == 1) {
+
+            account = new SavingsAccount(accountId, customer);
+
+        } else if (type == 2) {
+
+            account = new CurrentAccount(accountId, customer);
+
+        } else if (type == 3) {
+
+            account = new FixedDepositAccount(accountId, customer);
+
+        } else {
+
+            System.out.println("Invalid account type.");
+            return;
+        }
+
+        accounts[accountCount] = account;
         accountCount++;
 
         System.out.println("Account created successfully.");
@@ -186,22 +210,33 @@ public class MiniBank {
 
         for (int i = 0; i < accountCount; i++) {
 
+            Account account = accounts[i];
+
             System.out.println("\n----------------------");
 
-            System.out.println(
-                    StatementFormatter.format(accounts[i])
-            );
+            System.out.println("Account ID: "
+                    + account.getAccountId());
 
-            Customer customer =
-                    accounts[i].getCustomer();
+            System.out.println("Customer: "
+                    + account.getCustomer().getName());
 
-            System.out.println("Address: "
-                    + customer.getAddress());
+            System.out.println("Balance: "
+                    + account.getBalance());
 
-            if (customer instanceof Customer) {
-                System.out.println(
-                        "Customer is an instance of Customer."
-                );
+            System.out.println("Interest Rate: "
+                    + account.interestRate() + "%");
+
+            if (account instanceof SavingsAccount) {
+
+                System.out.println("Type: Savings Account");
+
+            } else if (account instanceof CurrentAccount) {
+
+                System.out.println("Type: Current Account");
+
+            } else if (account instanceof FixedDepositAccount) {
+
+                System.out.println("Type: Fixed Deposit Account");
             }
         }
     }
