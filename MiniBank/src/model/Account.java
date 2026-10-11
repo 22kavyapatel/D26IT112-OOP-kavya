@@ -1,5 +1,9 @@
 package model;
 
+import exception.BankException;
+import exception.InsufficientFundsException;
+import exception.InvalidAmountException;
+
 public abstract class Account
         implements Transactable, InterestBearing {
 
@@ -31,41 +35,66 @@ public abstract class Account
     }
 
     @Override
-    public void deposit(long amount) {
+    public void deposit(long amount) throws InvalidAmountException {
 
-        if (amount > 0) {
-            balance = balance + amount;
-            System.out.println("Amount deposited successfully.");
-        } else {
-            System.out.println("Invalid amount.");
+        if (amount <= 0) {
+            throw new InvalidAmountException(
+                    "Deposit amount must be greater than zero."
+            );
         }
+
+        balance += amount;
+        System.out.println("Amount deposited successfully.");
     }
 
     @Override
-    public boolean withdraw(long amount) {
+    public boolean withdraw(long amount)
+            throws InsufficientFundsException, InvalidAmountException {
 
         if (amount <= 0) {
-            System.out.println("Invalid amount.");
-            return false;
+            throw new InvalidAmountException(
+                    "Withdrawal amount must be greater than zero."
+            );
         }
 
         if (!canWithdraw(amount)) {
-            System.out.println("Withdrawal not allowed.");
-            return false;
+            long shortfall = Math.max(0, amount - balance);
+
+            throw new InsufficientFundsException(
+                    "Withdrawal failed.",
+                    shortfall
+            );
         }
 
-        balance = balance - amount;
-
+        balance -= amount;
         System.out.println("Amount withdrawn successfully.");
-
         return true;
+    }
+
+    public void transfer(Account to, long amount) throws BankException {
+
+        try {
+            if (to == null) {
+                throw new BankException("Destination account not found.");
+            }
+
+            withdraw(amount);
+            to.deposit(amount);
+
+            System.out.println("Transfer successful.");
+
+        } catch (BankException e) {
+            throw e;
+
+        } finally {
+            System.out.println("Transfer operation completed.");
+        }
     }
 
     public abstract boolean canWithdraw(long amount);
 
     @Override
     public String toString() {
-
         return "Account ID: " + accountId
                 + ", Customer: " + customer.getName()
                 + ", Balance: " + balance;
@@ -73,7 +102,6 @@ public abstract class Account
 
     @Override
     public boolean equals(Object obj) {
-
         if (this == obj) {
             return true;
         }
@@ -83,7 +111,6 @@ public abstract class Account
         }
 
         Account other = (Account) obj;
-
         return accountId == other.accountId;
     }
 

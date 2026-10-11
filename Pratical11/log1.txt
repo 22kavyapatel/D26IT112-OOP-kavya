@@ -1,0 +1,4 @@
+Server started
+User logged in
+ERROR database
+Server stopped
