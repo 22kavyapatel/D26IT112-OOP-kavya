@@ -1,3 +1,4 @@
+
 package model;
 
 import exception.BankException;
@@ -35,35 +36,31 @@ public abstract class Account
     }
 
     @Override
-    public void deposit(long amount) throws InvalidAmountException {
+    public synchronized void deposit(long amount)
+            throws InvalidAmountException {
 
         if (amount <= 0) {
             throw new InvalidAmountException(
-                    "Deposit amount must be greater than zero."
-            );
+                    "Deposit amount must be greater than zero.");
         }
 
-        balance += amount;
-        System.out.println("Amount deposited successfully.");
+        setBalance(getBalance() + amount);
     }
 
     @Override
-    public boolean withdraw(long amount)
+    public synchronized boolean withdraw(long amount)
             throws InsufficientFundsException, InvalidAmountException {
 
         if (amount <= 0) {
             throw new InvalidAmountException(
-                    "Withdrawal amount must be greater than zero."
-            );
+                    "Withdrawal amount must be greater than zero.");
         }
 
         if (!canWithdraw(amount)) {
             long shortfall = Math.max(0, amount - balance);
 
             throw new InsufficientFundsException(
-                    "Withdrawal failed.",
-                    shortfall
-            );
+                    "Withdrawal failed.", shortfall);
         }
 
         balance -= amount;
@@ -71,11 +68,13 @@ public abstract class Account
         return true;
     }
 
-    public void transfer(Account to, long amount) throws BankException {
+    public void transfer(Account to, long amount)
+            throws BankException {
 
         try {
             if (to == null) {
-                throw new BankException("Destination account not found.");
+                throw new BankException(
+                        "Destination account not found.");
             }
 
             withdraw(amount);
@@ -85,7 +84,6 @@ public abstract class Account
 
         } catch (BankException e) {
             throw e;
-
         } finally {
             System.out.println("Transfer operation completed.");
         }
