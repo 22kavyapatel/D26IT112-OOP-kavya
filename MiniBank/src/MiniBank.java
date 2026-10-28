@@ -1,6 +1,9 @@
+import java.util.ArrayList;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 import model.Account;
+import model.AccountStore;
 import model.Customer;
 import model.SavingsAccount;
 import model.CurrentAccount;
@@ -24,12 +27,15 @@ import static util.Validator.isValidName;
 public class MiniBank {
 
     static Scanner sc = new Scanner(System.in);
-
-    static Account[] accounts = new Account[10];
-
-    static int accountCount = 0;
+    static AccountStore store = new AccountStore();
 
     public static void main(String[] args) {
+
+        if (args.length > 0
+                && args[0].equals("--milestone2-demo")) {
+            demonstrateCollections();
+            return;
+        }
 
         BankInfo bank = new BankInfo("MiniBank", "CHARUSAT");
 
@@ -38,6 +44,7 @@ public class MiniBank {
         System.out.println("       Branch: " + bank.branch());
         System.out.println("================================");
 
+        // Anonymous class
         WithdrawRule rule1 = new WithdrawRule() {
             @Override
             public boolean allow(Account account, long amount) {
@@ -45,6 +52,7 @@ public class MiniBank {
             }
         };
 
+        // Lambda expression
         WithdrawRule rule2 =
                 (account, amount) -> account.canWithdraw(amount);
 
@@ -64,6 +72,7 @@ public class MiniBank {
             System.out.println("4. Transfer");
             System.out.println("5. Show Accounts");
             System.out.println("6. Exit");
+            System.out.println("7. Show Accounts Sorted by Balance");
 
             System.out.print("Enter your choice: ");
 
@@ -71,6 +80,7 @@ public class MiniBank {
                 int choice = sc.nextInt();
 
                 switch (choice) {
+
                     case 1:
                         createAccount();
                         break;
@@ -92,26 +102,34 @@ public class MiniBank {
                         break;
 
                     case 6:
-                        System.out.println("Thank you for using MiniBank!");
+                        System.out.println(
+                                "Thank you for using MiniBank!");
                         running = false;
+                        break;
+
+                    case 7:
+                        showAccountsSortedByBalance();
                         break;
 
                     default:
                         System.out.println("Invalid choice!");
                 }
 
-            } catch (java.util.InputMismatchException e) {
-                System.out.println("Please enter a valid number.");
+            } catch (InputMismatchException e) {
+                System.out.println(
+                        "Please enter a valid number.");
                 sc.nextLine();
 
             } finally {
-                System.out.println("Menu operation completed.");
+                System.out.println(
+                        "Menu operation completed.");
             }
         }
 
         sc.close();
     }
 
+    // Try-with-resources demonstration
     static void demonstrateTryWithResources() {
 
         try (BankResource resource = new BankResource()) {
@@ -119,16 +137,13 @@ public class MiniBank {
             throw new IllegalStateException("Demo exception");
 
         } catch (IllegalStateException e) {
-            System.out.println("Handled: " + e.getMessage());
+            System.out.println(
+                    "Handled: " + e.getMessage());
         }
     }
 
+    // Create account
     static void createAccount() {
-
-        if (accountCount == accounts.length) {
-            System.out.println("Account limit reached.");
-            return;
-        }
 
         try {
             System.out.print("Enter customer ID: ");
@@ -151,7 +166,8 @@ public class MiniBank {
                 return;
             }
 
-            Customer customer = new Customer(customerId, name, email);
+            Customer customer =
+                    new Customer(customerId, name, email);
 
             System.out.print("Enter city: ");
             String city = sc.nextLine();
@@ -172,45 +188,53 @@ public class MiniBank {
             System.out.print("Enter type: ");
             int type = sc.nextInt();
 
-            int accountId = accountCount + 1001;
+            int accountId = 1001 + store.getAll().size();
 
             Account account;
 
             if (type == 1) {
-                account = new SavingsAccount(accountId, customer);
+                account =
+                        new SavingsAccount(accountId, customer);
+
             } else if (type == 2) {
-                account = new CurrentAccount(accountId, customer);
+                account =
+                        new CurrentAccount(accountId, customer);
+
             } else if (type == 3) {
-                account = new FixedDepositAccount(accountId, customer);
+                account =
+                        new FixedDepositAccount(accountId, customer);
+
             } else {
                 System.out.println("Invalid account type.");
                 return;
             }
 
-            accounts[accountCount] = account;
-            accountCount++;
+            store.add(account);
 
-            System.out.println("Account created successfully.");
+            store.addTransaction(
+                    "Account created: " + accountId);
+
+            System.out.println(
+                    "Account created successfully.");
             System.out.println("Account ID: " + accountId);
 
-        } catch (java.util.InputMismatchException e) {
-            System.out.println("Invalid input. Please enter the correct data.");
+        } catch (InputMismatchException e) {
+            System.out.println(
+                    "Invalid input. Please enter the correct data.");
             sc.nextLine();
 
         } finally {
-            System.out.println("Account creation operation completed.");
+            System.out.println(
+                    "Account creation operation completed.");
         }
     }
 
+    // Find account
     static Account findAccount(int accountId) {
-        for (int i = 0; i < accountCount; i++) {
-            if (accounts[i].getAccountId() == accountId) {
-                return accounts[i];
-            }
-        }
-        return null;
+        return store.get(String.valueOf(accountId));
     }
 
+    // Deposit money
     static void deposit() {
 
         try {
@@ -220,7 +244,8 @@ public class MiniBank {
             Account account = findAccount(accountId);
 
             if (account == null) {
-                throw new AccountNotFoundException("Account not found.");
+                throw new AccountNotFoundException(
+                        "Account not found.");
             }
 
             System.out.print("Enter amount: ");
@@ -228,24 +253,31 @@ public class MiniBank {
 
             account.deposit(amount);
 
+            store.addTransaction(
+                    "Deposit: Account " + accountId
+                    + ", Amount " + amount);
+
+            System.out.println("Deposit successful.");
+
         } catch (InvalidAmountException e) {
-            System.out.println("Deposit failed: " + e.getMessage());
+            System.out.println(
+                    "Deposit failed: " + e.getMessage());
 
         } catch (AccountNotFoundException e) {
-            System.out.println("Deposit failed: " + e.getMessage());
+            System.out.println(
+                    "Deposit failed: " + e.getMessage());
 
-        } catch (BankException e) {
-            System.out.println("Deposit failed: " + e.getMessage());
-
-        } catch (java.util.InputMismatchException e) {
+        } catch (InputMismatchException e) {
             System.out.println("Please enter numbers only.");
             sc.nextLine();
 
         } finally {
-            System.out.println("Deposit operation finished.");
+            System.out.println(
+                    "Deposit operation finished.");
         }
     }
 
+    // Withdraw money
     static void withdraw() {
 
         try {
@@ -255,7 +287,8 @@ public class MiniBank {
             Account account = findAccount(accountId);
 
             if (account == null) {
-                throw new AccountNotFoundException("Account not found.");
+                throw new AccountNotFoundException(
+                        "Account not found.");
             }
 
             System.out.print("Enter amount: ");
@@ -263,28 +296,37 @@ public class MiniBank {
 
             account.withdraw(amount);
 
+            store.addTransaction(
+                    "Withdrawal: Account " + accountId
+                    + ", Amount " + amount);
+
+            System.out.println("Withdrawal successful.");
+
         } catch (InsufficientFundsException e) {
-            System.out.println("Withdrawal failed: " + e.getMessage());
-            System.out.println("Shortfall: " + e.getShortfall());
+            System.out.println(
+                    "Withdrawal failed: " + e.getMessage());
+            System.out.println(
+                    "Shortfall: " + e.getShortfall());
 
         } catch (InvalidAmountException e) {
-            System.out.println("Withdrawal failed: " + e.getMessage());
+            System.out.println(
+                    "Withdrawal failed: " + e.getMessage());
 
         } catch (AccountNotFoundException e) {
-            System.out.println("Withdrawal failed: " + e.getMessage());
+            System.out.println(
+                    "Withdrawal failed: " + e.getMessage());
 
-        } catch (BankException e) {
-            System.out.println("Withdrawal failed: " + e.getMessage());
-
-        } catch (java.util.InputMismatchException e) {
+        } catch (InputMismatchException e) {
             System.out.println("Please enter numbers only.");
             sc.nextLine();
 
         } finally {
-            System.out.println("Withdrawal operation finished.");
+            System.out.println(
+                    "Withdrawal operation finished.");
         }
     }
 
+    // Transfer money
     static void transfer() {
 
         try {
@@ -298,7 +340,8 @@ public class MiniBank {
                         "Source account not found.");
             }
 
-            System.out.print("Enter destination account ID: ");
+            System.out.print(
+                    "Enter destination account ID: ");
             int destinationId = sc.nextInt();
 
             Account destination = findAccount(destinationId);
@@ -308,8 +351,9 @@ public class MiniBank {
                         "Destination account not found.");
             }
 
-            if (source.getAccountId() == destination.getAccountId()) {
-                System.out.println("Source and destination must differ.");
+            if (sourceId == destinationId) {
+                System.out.println(
+                        "Source and destination must differ.");
                 return;
             }
 
@@ -318,52 +362,162 @@ public class MiniBank {
 
             source.transfer(destination, amount);
 
+            store.addTransaction(
+                    "Transfer: From " + sourceId
+                    + " to " + destinationId
+                    + ", Amount " + amount);
+
         } catch (InsufficientFundsException e) {
-            System.out.println("Transfer failed: " + e.getMessage());
-            System.out.println("Shortfall: " + e.getShortfall());
+            System.out.println(
+                    "Transfer failed: " + e.getMessage());
+            System.out.println(
+                    "Shortfall: " + e.getShortfall());
 
         } catch (InvalidAmountException e) {
-            System.out.println("Transfer failed: " + e.getMessage());
+            System.out.println(
+                    "Transfer failed: " + e.getMessage());
 
         } catch (AccountNotFoundException e) {
-            System.out.println("Transfer failed: " + e.getMessage());
+            System.out.println(
+                    "Transfer failed: " + e.getMessage());
 
         } catch (BankException e) {
-            System.out.println("Transfer failed: " + e.getMessage());
+            System.out.println(
+                    "Transfer failed: " + e.getMessage());
 
-        } catch (java.util.InputMismatchException e) {
+        } catch (InputMismatchException e) {
             System.out.println("Please enter numbers only.");
             sc.nextLine();
 
         } finally {
-            System.out.println("Transfer operation finished.");
+            System.out.println(
+                    "Transfer operation finished.");
         }
     }
 
+    // Display all accounts
     static void showAccounts() {
 
-        if (accountCount == 0) {
+        ArrayList<Account> accounts = store.getAll();
+
+        if (accounts.isEmpty()) {
             System.out.println("No accounts found.");
             return;
         }
 
-        for (int i = 0; i < accountCount; i++) {
-
-            Account account = accounts[i];
+        for (Account account : accounts) {
 
             System.out.println("\n----------------------");
-            System.out.println(StatementFormatter.format(account));
+
+            System.out.println(
+                    StatementFormatter.format(account));
 
             if (account instanceof SavingsAccount) {
                 System.out.println("Type: Savings Account");
+
             } else if (account instanceof CurrentAccount) {
                 System.out.println("Type: Current Account");
+
             } else if (account instanceof FixedDepositAccount) {
-                System.out.println("Type: Fixed Deposit Account");
+                System.out.println(
+                        "Type: Fixed Deposit Account");
             }
 
-            System.out.println("Yearly Interest: "
+            System.out.println(
+                    "Yearly Interest: "
                     + account.yearlyInterest());
         }
+    }
+
+    // Display accounts sorted by balance
+    static void showAccountsSortedByBalance() {
+
+        ArrayList<Account> accounts =
+                store.sortedByBalance();
+
+        if (accounts.isEmpty()) {
+            System.out.println("No accounts found.");
+            return;
+        }
+
+        System.out.println(
+                "\n===== Accounts Sorted by Balance =====");
+
+        for (Account account : accounts) {
+            System.out.println(account);
+        }
+    }
+
+    // Demonstrate HashMap, ArrayList, Comparator and Comparable
+    static void demonstrateCollections() {
+
+        System.out.println(
+                "===== MiniBank Milestone 2 =====");
+
+        AccountStore demoStore = new AccountStore();
+
+        Customer c1 =
+                new Customer(1, "Kavya",
+                        "kavya@example.com");
+
+        Customer c2 =
+                new Customer(2, "Rahul",
+                        "rahul@example.com");
+
+        Customer c3 =
+                new Customer(3, "Priya",
+                        "priya@example.com");
+
+        Account a1 = new SavingsAccount(1001, c1);
+        Account a2 = new CurrentAccount(1002, c2);
+        Account a3 = new SavingsAccount(1003, c3);
+
+        try {
+            a1.deposit(5000);
+            a2.deposit(2000);
+            a3.deposit(8000);
+
+            demoStore.add(a1);
+            demoStore.add(a2);
+            demoStore.add(a3);
+
+            demoStore.addTransaction(
+                    "Deposited 5000 into account 1001");
+            demoStore.addTransaction(
+                    "Deposited 2000 into account 1002");
+            demoStore.addTransaction(
+                    "Deposited 8000 into account 1003");
+
+        } catch (BankException e) {
+            System.out.println(e.getMessage());
+            return;
+        }
+
+        System.out.println("\nAccounts sorted by balance:");
+
+        for (Account account : demoStore.sortedByBalance()) {
+            System.out.println(account);
+        }
+
+        System.out.println("\nSearch account 1002:");
+
+        Account found = demoStore.get("1002");
+
+        if (found != null) {
+            System.out.println(found);
+        } else {
+            System.out.println("Account not found.");
+        }
+
+        System.out.println("\nTransaction History:");
+
+        for (String transaction :
+                demoStore.getTransactionHistory()) {
+            System.out.println(transaction);
+        }
+
+        System.out.println(
+                "\nTotal accounts: "
+                + demoStore.getAll().size());
     }
 }
