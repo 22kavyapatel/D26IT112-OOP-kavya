@@ -6,31 +6,25 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import model.Account;
+import exception.BankException;
 
 public class TransactionProcessor {
 
-    private ExecutorService executor;
+    private final ExecutorService executor =
+            Executors.newFixedThreadPool(4);
 
-    private ConcurrentHashMap<String, Account> accounts;
-
-    public TransactionProcessor() {
-        executor = Executors.newFixedThreadPool(4);
-        accounts = new ConcurrentHashMap<>();
-    }
+    private final ConcurrentHashMap<String, Account> accounts =
+            new ConcurrentHashMap<>();
 
     public void addAccount(Account account) {
-        String accountNumber =
-                String.valueOf(account.getAccountId());
-
-        accounts.put(accountNumber, account);
+        accounts.put(String.valueOf(account.getAccountId()), account);
     }
 
-    public Account getAccount(String accountNumber) {
-        return accounts.get(accountNumber);
+    public Account getAccount(String id) {
+        return accounts.get(id);
     }
 
-    public ConcurrentHashMap<String, Account>
-            getAccounts() {
+    public ConcurrentHashMap<String, Account> getAccounts() {
         return accounts;
     }
 
@@ -38,12 +32,38 @@ public class TransactionProcessor {
         executor.execute(task);
     }
 
+    public void depositBatch(int accountId, long[] amounts) {
+        Account account = accounts.get(String.valueOf(accountId));
+
+        if (account == null) {
+            throw new IllegalArgumentException(
+                    "Account not found: " + accountId);
+        }
+
+        for (long amount : amounts) {
+            if (amount <= 0) {
+                throw new IllegalArgumentException(
+                        "Deposit amount must be positive.");
+            }
+        }
+
+        for (long amount : amounts) {
+            submit(() -> {
+                try {
+                    account.deposit(amount);
+                } catch (BankException e) {
+                    System.err.println(
+                            "Transaction failed: " + e.getMessage());
+                }
+            });
+        }
+    }
+
     public void stop() {
         executor.shutdown();
 
         try {
-            if (!executor.awaitTermination(
-                    30, TimeUnit.SECONDS)) {
+            if (!executor.awaitTermination(30, TimeUnit.SECONDS)) {
                 executor.shutdownNow();
             }
         } catch (InterruptedException e) {
