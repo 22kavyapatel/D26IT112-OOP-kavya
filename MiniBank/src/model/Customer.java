@@ -1,8 +1,13 @@
+
 package model;
+
+import annotation.Id;
 
 public class Customer implements Cloneable {
 
+    @Id
     private int customerId;
+
     private String name;
     private String email;
     private Address address;
@@ -51,7 +56,6 @@ public class Customer implements Cloneable {
 
     @Override
     public String toString() {
-
         return "Customer ID: " + customerId
                 + ", Name: " + name
                 + ", Email: " + email
@@ -60,7 +64,6 @@ public class Customer implements Cloneable {
 
     @Override
     public boolean equals(Object obj) {
-
         if (this == obj) {
             return true;
         }
@@ -81,9 +84,7 @@ public class Customer implements Cloneable {
 
     @Override
     public Customer clone() {
-
         try {
-
             Customer copy = (Customer) super.clone();
 
             if (address != null) {

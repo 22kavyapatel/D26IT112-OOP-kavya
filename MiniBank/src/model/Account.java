@@ -1,5 +1,7 @@
+
 package model;
 
+import annotation.Id;
 import exception.BankException;
 import exception.InsufficientFundsException;
 import exception.InvalidAmountException;
@@ -8,7 +10,9 @@ public abstract class Account
         implements Transactable, InterestBearing,
                    Comparable<Account> {
 
+    @Id
     private int accountId;
+
     private Customer customer;
     private long balance;
 
@@ -35,7 +39,6 @@ public abstract class Account
         this.balance = balance;
     }
 
-    // Deposit money into the account
     @Override
     public synchronized void deposit(long amount)
             throws InvalidAmountException {
@@ -48,7 +51,6 @@ public abstract class Account
         setBalance(getBalance() + amount);
     }
 
-    // Withdraw money from the account
     @Override
     public synchronized boolean withdraw(long amount)
             throws InsufficientFundsException,
@@ -73,7 +75,6 @@ public abstract class Account
         return true;
     }
 
-    // Transfer money to another account
     public void transfer(Account to, long amount)
             throws BankException {
 
@@ -97,17 +98,14 @@ public abstract class Account
         }
     }
 
-    // Compare accounts by account number
     @Override
     public int compareTo(Account other) {
         return Integer.compare(
                 this.accountId, other.accountId);
     }
 
-    // Every account type implements this method
     public abstract boolean canWithdraw(long amount);
 
-    // Display account information
     @Override
     public String toString() {
         return "Account ID: " + accountId
@@ -115,7 +113,6 @@ public abstract class Account
                 + ", Balance: " + balance;
     }
 
-    // Compare accounts using account ID
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
